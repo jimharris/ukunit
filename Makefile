@@ -58,7 +58,7 @@ build/%.o: build/%.c
 	$(V)echo [OBJ] $@
 	$(V)gcc -o $@ -c $< $(INCLUDE_FLAGS)
 
-$(ROOT_DIR)/%.o: $(ROOT_DIR)/%.c
+$(ROOT_DIR)/%.o: $(ROOT_DIR)/%.c $(ROOT_DIR)/stub.c
 	$(V)echo [OBJ] $*.o
 	$(V)gcc -o $@ -c $< $(INCLUDE_FLAGS) -DMODULE
 
