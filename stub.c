@@ -56,7 +56,9 @@ void __check_object_size(const void *ptr, unsigned long n, bool to_user) { }
 /* drivers/char/random.c */
 void get_random_bytes(void *buf, size_t len) { }
 
-struct rw_semaphore cxl_dpa_rwsem;
+DECLARE_RWSEM(cxl_dpa_rwsem);
+DECLARE_RWSEM(cxl_region_rwsem);
+
 struct attribute_group cxl_base_attribute_group;
 struct bus_type cxl_bus_type;
 struct cxl_port *to_cxl_port(const struct device *dev)
@@ -134,6 +136,7 @@ struct resource *alloc_free_mem_region(struct resource *base, unsigned long size
 /* include/linux/dev_printk.h, lib/dynamic_debug.c */
 void _dev_err(const struct device *dev, const char *fmt, ...) { }
 void _dev_warn(const struct device *dev, const char *fmt, ...) { }
+void _dev_info(const struct device *dev, const char *fmt, ...) { }
 void __dynamic_dev_dbg(struct _ddebug *descriptor, const struct device *dev,
 		const char *fmt, ...) { }
 void __dynamic_pr_debug(struct _ddebug *descriptor, const char *fmt, ...) { }
