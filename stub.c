@@ -69,7 +69,10 @@ struct cxl_root_decoder *to_cxl_root_decoder(struct device *dev)
 {
 	return container_of(dev, struct cxl_root_decoder, cxlsd.cxld.dev);
 }
-struct cxl_switch_decoder *to_cxl_switch_decoder(struct device *dev) { return NULL; }
+struct cxl_switch_decoder *to_cxl_switch_decoder(struct device *dev)
+{
+	return container_of(dev, struct cxl_switch_decoder, cxld.dev);
+}
 struct cxl_endpoint_decoder *to_cxl_endpoint_decoder(struct device *dev) { return NULL; }
 struct cxl_decoder *to_cxl_decoder(struct device *dev) { return NULL; }
 int cxl_mem_get_poison(struct cxl_memdev *cxlmd, u64 offset, u64 len,

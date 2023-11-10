@@ -91,6 +91,43 @@ interleave_ways_store_test(void)
 	free(region);
 }
 
+static void
+cxl_port_setup_targets_test(void)
+{
+	struct cxl_port			port;
+	struct cxl_region		region;
+	struct cxl_endpoint_decoder	ep_decoder;
+	struct cxl_port			ep_decoder_port;
+	struct cxl_region_ref		region_ref;
+	struct cxl_port			parent_port;
+	struct cxl_switch_decoder	switch_decoder;
+	struct cxl_root_decoder		root_decoder;
+	struct resource			resource;
+	struct cxl_memdev		memdev;
+	struct cxl_ep			ep;
+	struct cxl_dport		dport;
+
+	ep_decoder.cxld.dev.parent = &ep_decoder_port.dev;
+	xa_init(&port.regions);
+	radix_tree_init();
+	CU_ASSERT(xa_insert(&port.regions, (unsigned long)&region, &region_ref, GFP_KERNEL) == 0);
+	region_ref.nr_targets = 2;
+	port.dev.parent = &parent_port.dev;
+	region_ref.decoder = &switch_decoder.cxld;
+	region.dev.parent = &root_decoder.cxlsd.cxld.dev;
+	region.params.interleave_granularity = 256;
+	root_decoder.cxlsd.cxld.interleave_ways = 2;
+	switch_decoder.nr_targets = 2;
+	resource.start = 0x1000000000;
+	resource.end =   0x2000000000;
+	region.params.res = &resource;
+	ep_decoder_port.uport_dev = &memdev.dev;
+	xa_init(&port.endpoints);
+	ep.dport = &dport;
+	CU_ASSERT(xa_insert(&port.endpoints, (unsigned long)&memdev, &ep, GFP_KERNEL) == 0);
+	CU_ASSERT(cxl_port_setup_targets(&port, &region, &ep_decoder) == 0);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -105,6 +142,7 @@ main(int argc, char **argv)
 	CU_ADD_TEST(suite, is_dup_test);
 	CU_ADD_TEST(suite, is_cxl_pmem_region_test);
 	CU_ADD_TEST(suite, interleave_ways_store_test);
+	CU_ADD_TEST(suite, cxl_port_setup_targets_test);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
