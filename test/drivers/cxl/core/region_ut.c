@@ -6,6 +6,8 @@
 #include <CUnit/Basic.h>
 #include <stdlib.h>
 
+DECLARE_RWSEM(cxl_dpa_rwsem);
+
 static void
 uuid_show_test(void)
 {

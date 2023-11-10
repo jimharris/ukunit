@@ -13,3 +13,4 @@
 #define sigset_t	__ksigset_t
 #define fd_set		__kfd_set
 #define blkcnt_t	__kblkcnt_t
+#define TRACE_EVENT(name, ...) static inline void trace_##name(...) {}

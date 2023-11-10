@@ -50,17 +50,24 @@ int blocking_notifier_call_chain(struct blocking_notifier_head *nh, unsigned lon
 void kernfs_get(struct kernfs_node *kn) { }
 void kernfs_put(struct kernfs_node *kn) { }
 
+/* fs/seq_file.c */
+void seq_printf(struct seq_file *m, const char *f, ...) { }
+
 /* mm/usercopy.c */
 void __check_object_size(const void *ptr, unsigned long n, bool to_user) { }
 
 /* drivers/char/random.c */
 void get_random_bytes(void *buf, size_t len) { }
 
-DECLARE_RWSEM(cxl_dpa_rwsem);
-DECLARE_RWSEM(cxl_region_rwsem);
-
 struct attribute_group cxl_base_attribute_group;
 struct bus_type cxl_bus_type;
+int cxl_mem_get_poison(struct cxl_memdev *cxlmd, u64 offset, u64 len,
+		struct cxl_region *cxlr) { return 0; }
+struct cxl_nvdimm_bridge *cxl_find_nvdimm_bridge(struct cxl_memdev *cxlmd) { return NULL; }
+bool is_cxl_memdev(const struct device *dev) { return false; }
+
+/* drivers/cxl/core/port.c */
+DECLARE_RWSEM(cxl_region_rwsem);
 struct cxl_port *to_cxl_port(const struct device *dev)
 {
 	return container_of(dev, struct cxl_port, dev);
@@ -75,16 +82,22 @@ struct cxl_switch_decoder *to_cxl_switch_decoder(struct device *dev)
 }
 struct cxl_endpoint_decoder *to_cxl_endpoint_decoder(struct device *dev) { return NULL; }
 struct cxl_decoder *to_cxl_decoder(struct device *dev) { return NULL; }
-int cxl_mem_get_poison(struct cxl_memdev *cxlmd, u64 offset, u64 len,
-		struct cxl_region *cxlr) { return 0; }
-struct cxl_nvdimm_bridge *cxl_find_nvdimm_bridge(struct cxl_memdev *cxlmd) { return NULL; }
 bool is_endpoint_decoder(struct device *dev) { return true; }
 bool is_root_decoder(struct device *dev) { return true; }
 bool is_switch_decoder(struct device *dev) { return true; }
 int __cxl_driver_register(struct cxl_driver *cxl_drv, struct module *owner,
 		const char *modname) { return 0; }
 void cxl_driver_unregister(struct cxl_driver *cxl_drv) { }
-struct module __this_module;
+int cxl_decoder_add_locked(struct cxl_decoder *cxld, int *target_map) { return 0; }
+int cxl_decoder_autoremove(struct device *host, struct cxl_decoder *cxld) { return 0; }
+struct cxl_switch_decoder *cxl_switch_decoder_alloc(struct cxl_port *port,
+						    unsigned int nr_targets) { return NULL; }
+struct cxl_endpoint_decoder *cxl_endpoint_decoder_alloc(struct cxl_port *port) { return NULL; }
+int cxl_num_decoders_committed(struct cxl_port *port) { return 0; }
+
+/* drivers/cxl/core/regs.c */
+int cxl_map_component_regs(const struct cxl_register_map *map, struct cxl_component_regs *regs,
+			   unsigned long map_mask) { return 0; }
 
 /* mm/percpu.c */
 unsigned long __per_cpu_offset[NR_CPUS];
@@ -101,6 +114,8 @@ int __cpuhp_setup_state(enum cpuhp_state state, const char *name, bool invoke,
 /* drivers/base/devres.c */
 int __devm_add_action(struct device *dev, void (*action)(void *), void *data, const char *name) { return 0; }
 void devm_release_action(struct device *dev, void (*action)(void *), void *data) { }
+void *devm_kmalloc(struct device *dev, size_t size, gfp_t gfp) { return NULL; }
+void devm_remove_action(struct device *dev, void (*action)(void *), void *data) { }
 
 /* lib/bitmap.c */
 void __bitmap_clear(unsigned long *map, unsigned int start, int len) { }
@@ -135,6 +150,15 @@ int insert_resource(struct resource *parent, struct resource *new) { return 0; }
 int remove_resource(struct resource *old) { return 0; }
 struct resource *alloc_free_mem_region(struct resource *base, unsigned long size,
 		unsigned long align, const char *name) { return NULL; }
+struct resource *__request_region(struct resource *parent,
+				  resource_size_t start, resource_size_t n,
+				  const char *name, int flags) { return NULL; }
+void __release_region(struct resource *parent, resource_size_t start, resource_size_t n) { }
+
+/* kernel/time/timer.c */
+unsigned int g_msecs;
+void msleep(unsigned int msecs) { g_msecs += msecs; }
+void usleep_range_state(unsigned long min, unsigned long max, unsigned int state) { }
 
 /* include/linux/dev_printk.h, lib/dynamic_debug.c */
 void _dev_err(const struct device *dev, const char *fmt, ...) { }
@@ -239,3 +263,20 @@ asmlinkage void dump_stack_lvl(const char *log_lvl) { }
 int kobject_uevent(struct kobject *kobj, enum kobject_action) { return 0; }
 int kobject_uevent_env(struct kobject *kobj, enum kobject_action, char *envp[]) { return 0; }
 int kobject_synth_uevent(struct kobject *kobj, const char *buf, size_t count) { return 0; }
+
+struct module __this_module;
+
+void __bad_mask(void) { }
+
+/* arch/xxx/lib/delay.c */
+void __udelay(unsigned long usecs) { }
+
+/* lib/trace_readwrite.c */
+void log_write_mmio(u64 val, u8 width, volatile void __iomem *addr,
+		    unsigned long caller_addr, unsigned long caller_addr0) { }
+void log_post_write_mmio(u64 val, u8 width, volatile void __iomem *addr,
+			 unsigned long caller_addr, unsigned long caller_addr0) { }
+void log_read_mmio(u8 width, const volatile void __iomem *addr,
+		   unsigned long caller_addr, unsigned long caller_addr0) { }
+void log_post_read_mmio(u64 val, u8 width, const volatile void __iomem *addr,
+			unsigned long caller_addr, unsigned long caller_addr0) { }
